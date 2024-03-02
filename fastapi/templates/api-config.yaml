@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-secret
+type: Opaque
+data:
+  HNG_LESSON_DAY: ZGF5MQ==
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-configmap
+data:
+  # HNG_LESSON_DAY: "day1"
+  HNG_API_ORIGINS: "{{ .Values.api.origins }}"
+  HNG_API_HOST: "{{ .Values.api.host }}"
+  HNG_API_PORT: "{{ .Values.api.port }}"

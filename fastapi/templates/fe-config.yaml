@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: t3-fe-configmap
+data:
+  REACT_APP_API_URL: "{{ .Values.react.url }}"
+  REACT_APP_LESSON_DAY: "{{ .Values.react.day }}"

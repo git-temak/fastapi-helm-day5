@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: api-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/api
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: api-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api-container
+          image: teamark/hng-docker-task1:hng-task1-be
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: api-volume
+              mountPath: /data/
+          command: ["python", "main.py"]
+          env:
+            - name: HNG_LESSON_DAY
+              valueFrom:
+                secretKeyRef:
+                  name: api-secret
+                  key: HNG_LESSON_DAY
+            - name: HNG_API_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: api-configmap
+                  key: HNG_API_ORIGINS
+            - name: HNG_API_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: api-configmap
+                  key: HNG_API_HOST
+            - name: HNG_API_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: api-configmap
+                  key: HNG_API_PORT
+      volumes:
+        - name: api-volume
+          persistentVolumeClaim:
+            claimName: api-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+spec:
+  type: NodePort
+  selector:
+    app: api
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+      nodePort: 30800
